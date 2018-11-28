@@ -1,8 +1,10 @@
-import exampleVideoData from '../data/exampleVideoData.js';
+// import exampleVideoData from '../data/exampleVideoData.js';
 import VideoList from './VideoList.js';
 import VideoPlayer from './VideoPlayer.js';
 import YOUTUBE_API_KEY from '../config/youtube.example.js';
 import Search from './Search.js';
+import searchYouTube from '../lib/searchYouTube.js';
+
 // var App = () => (
 //   <div>
 //     <nav className="navbar">
@@ -25,8 +27,8 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      videos: exampleVideoData,
-      selectedVideo: exampleVideoData[0]
+      videos: [],
+      selectedVideo: {}
     };
   }
 
@@ -35,12 +37,12 @@ class App extends React.Component {
       selectedVideo: video
     });
   }
-
-  handleSearch(search) {
+  
+  componentDidMount() {
     var options = {
-      querry: search,
+      query: 'coffee',
       max: 5,
-      key: window.YOUTUBE_API_KEY
+      key: YOUTUBE_API_KEY
     };
     this.props.searchYouTube(options, (data) => {
       this.setState({
@@ -49,13 +51,31 @@ class App extends React.Component {
       });
     });
   }
+  // componentDidMount() {
+  //   this.props.searchYouTube('dogs');
+  // }
+  
+  handleSearch(search) {
+    var options = {
+      query: search,
+      max: 5,
+      key: YOUTUBE_API_KEY
+    };
+    this.props.searchYouTube(options, (data) => {
+      this.setState({
+        videos: data,
+        selectedVideo: data[0]
+      });
+    });
+  }
+
       
   render() {
     return (
       <div>
         <nav className="navbar">
           <div className="col-md-6 offset-md-3">
-            <Search handleSearch={this.handleSearch.bind(this)} />
+            <Search handleSearchInputChange={this.handleSearch.bind(this)} />
           </div>
         </nav>
         
@@ -64,7 +84,9 @@ class App extends React.Component {
             <VideoPlayer video={this.state.selectedVideo}/>
           </div>
           <div className="col-md-5">
-            <VideoList handleClick={this.handleClick.bind(this)} videos={this.state.videos}/>
+            <VideoList 
+              handleClick={this.handleClick.bind(this)} 
+              videos={this.state.videos}/>
           </div>
         </div>
       </div>
